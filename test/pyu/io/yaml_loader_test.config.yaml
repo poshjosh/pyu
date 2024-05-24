@@ -1,0 +1,10 @@
+str: Test
+bool: true
+int: 1
+float: 0.3
+multi-line:
+  text: |
+    Line 1
+    Line 2
+
+
