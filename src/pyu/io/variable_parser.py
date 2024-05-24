@@ -5,9 +5,16 @@ from typing import Union, Tuple, Callable
 """
 {
   will-be-replaced-from-environment: ${APP_NAME} 
-  has-nested:
+  # `self` is a special variable that refers to this hierarchy.
+  reference-to-author-greeting: $self.author.greeting
+  author:
     greeting: "Hello World!"
-  reference-to-nested: ${self.has-nested.greeting}
+    hobbies: 
+      - creating
+      - hiking
+      # `me` is a special variable that refers to the current path within this hierarchy.
+      # In this case, `me` refers to `author.hobbies`
+      - "${self.me[0]} software"  # creating software  
 }
 """
 SELF_KEY = 'self'
