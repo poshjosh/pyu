@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 if __name__ == "__main__":
     setup(name="pyu",
-          version="0.1.1",
+          version="0.1.3",
           description="Python utilities for common tasks",
           author="PyU Team",
           author_email="posh.bc@gmail.com",
