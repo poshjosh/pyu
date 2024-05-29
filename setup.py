@@ -17,7 +17,7 @@ if __name__ == "__main__":
           url="https://github.com/poshjosh/pyu",
           packages=find_packages(
               where='src',
-              include=['pyu'],
+              include=['pyu', 'pyu.*'],
           ),
           package_dir={"": "src"},
           )
