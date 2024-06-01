@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 if __name__ == "__main__":
     setup(name="pyu",
-          version="0.1.3",
+          version="0.1.4",
           description="Python utilities for common tasks",
           author="PyU Team",
           author_email="posh.bc@gmail.com",
@@ -18,6 +18,7 @@ if __name__ == "__main__":
           packages=find_packages(
               where='src',
               include=['pyu', 'pyu.*'],
+              exclude=['test', 'test.*']
           ),
           package_dir={"": "src"},
           )

@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-###
+## [0.1.4] - 2024-06-01
+
+### Added
 
 - Lock down dependency versions.
-- Add scripts for installing and running tests.
+- Add scripts for running tests, installing.
+
+### Changed
+
+- `variable_parser` method names prefix from `parse_` to `replace_`
+- `yaml_loader` to expose methods `load_from_path`and `get_path`
 
 ## [0.1.3] - 2024-05-29
 
