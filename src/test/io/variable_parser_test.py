@@ -2,48 +2,48 @@ import os
 import unittest
 
 from pyu.io.file import load_yaml_str
-from pyu.io.variable_parser import parse_variables, replace_all_variables
+from pyu.io.variable_parser import replace_scoped_variables, replace_all_variables
 
 
 class VariableParserTest(unittest.TestCase):
-    def test_parse_variables_given_single_variable(self):
+    def test_replace_scoped_variables_given_single_variable(self):
         text = '$k'
-        result = parse_variables(text, {'k': 'v'})
+        result = replace_scoped_variables(text, {'k': 'v'})
         self.assertEqual('v', result)
 
-    def test_parse_variables_given_single_enclosed_variable(self):
+    def test_replace_scoped_variables_given_single_enclosed_variable(self):
         text = '${k}'
-        result = parse_variables(text, {'k': 'v'})
+        result = replace_scoped_variables(text, {'k': 'v'})
         self.assertEqual('v', result)
 
-    def test_parse_variables_given_multiple_variables_in_middle(self):
+    def test_replace_scoped_variables_given_multiple_variables_in_middle(self):
         text = 'before $k_0 $k_1 after'
-        result = parse_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
+        result = replace_scoped_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
         self.assertEqual('before v_0 v_1 after', result)
 
-    def test_parse_variables_given_multiple_enclosed_variables_in_middle(self):
+    def test_replace_scoped_variables_given_multiple_enclosed_variables_in_middle(self):
         text = 'before ${k_0} ${k_1} after'
-        result = parse_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
+        result = replace_scoped_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
         self.assertEqual('before v_0 v_1 after', result)
 
-    def test_parse_variables_given_multiple_variables_at_start(self):
+    def test_replace_scoped_variables_given_multiple_variables_at_start(self):
         text = '$k_0 $k_1 after'
-        result = parse_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
+        result = replace_scoped_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
         self.assertEqual('v_0 v_1 after', result)
 
-    def test_parse_variables_given_multiple_enclosed_variables_at_start(self):
+    def test_replace_scoped_variables_given_multiple_enclosed_variables_at_start(self):
         text = '${k_0} ${k_1} after'
-        result = parse_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
+        result = replace_scoped_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
         self.assertEqual('v_0 v_1 after', result)
 
-    def test_parse_variables_given_multiple_variables_at_end(self):
+    def test_replace_scoped_variables_given_multiple_variables_at_end(self):
         text = 'before $k_0 $k_1'
-        result = parse_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
+        result = replace_scoped_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
         self.assertEqual('before v_0 v_1', result)
 
-    def test_parse_variables_given_multiple_enclosed_variables_at_end(self):
+    def test_replace_scoped_variables_given_multiple_enclosed_variables_at_end(self):
         text = 'before ${k_0} ${k_1}'
-        result = parse_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
+        result = replace_scoped_variables(text, {'k_0': 'v_0', 'k_1': 'v_1'})
         self.assertEqual('before v_0 v_1', result)
 
     def test_replace_all_variables(self):

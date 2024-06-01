@@ -30,17 +30,17 @@ class YamlLoader:
     def load_app_config(self, path: str = None) -> dict[str, any]:
         if not path:
             path = self.get_app_config_path()
-        return self.__load_from_path(path)
+        return self.load_from_path(path)
 
     def load_logging_config(self, path: str = None) -> dict[str, any]:
         if not path:
             path = self.get_logging_config_path()
-        return self.__load_from_path(path)
+        return self.load_from_path(path)
 
     def load_config(self, path: [str]) -> dict[str, any]:
-        return self.__load_from_path(self.get_path(path))
+        return self.load_from_path(self.get_path(path))
 
-    def __load_from_path(self, path: str) -> dict[str, any]:
+    def load_from_path(self, path: str) -> dict[str, any]:
         try:
             return self.__transform(load_yaml(path))
         except FileNotFoundError:
@@ -48,14 +48,12 @@ class YamlLoader:
             return {}
 
     def get_app_config_path(self) -> str:
-        return self.__get_path('app')
+        return self.get_path('app')
 
     def get_logging_config_path(self) -> str:
-        return self.__get_path('logging')
+        return self.get_path('logging')
 
-    def get_path(self, path: [str]) -> str:
-        return self.__get_path(os.path.join(path))
-
-    def __get_path(self, id_str: str) -> str:
+    def get_path(self, path: Union[str, Iterable]) -> str:
+        path = path if isinstance(path, str) else os.path.join(*path)
         return os.path.join(self.__config_path,
-                            f'{self.__prefix}{id_str}{self.__suffix}.{self.__extension}')
+                            f'{self.__prefix}{path}{self.__suffix}.{self.__extension}')
