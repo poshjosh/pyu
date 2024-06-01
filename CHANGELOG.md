@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+###
+
+- Lock down dependency versions.
+- Add scripts for installing and running tests.
+
 ## [0.1.3] - 2024-05-29
 
 ### Fixed
