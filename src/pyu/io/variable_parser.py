@@ -34,24 +34,35 @@ def contains_variable(value: any) -> bool:
     return False
 
 
-def replace_all_variables(target: dict[str, any], source: dict[str, any]) -> dict[str, any]:
+def _check_replaced(text: str) -> str:
+    if contains_variable(text):
+        raise ValueError(f'Failed to replace variables in: {text}')
+    return text
 
+
+def replace_all_variables(target: dict[str, any],
+                          source: dict[str, any],
+                          check_replaced: Callable[[str], str] = _check_replaced,
+                          nodes_to_skip: Union[list[str], None] = None) -> dict[str, any]:
     target = copy.deepcopy(target)
+
+    def replace_unscoped_variables(text: str, context: dict[str, any]) -> str:
+        def replace(name: str) -> Union[str, None]:
+            return context.get(name, None)
+
+        return replace_variables(text, replace)
 
     # We first replace all variables in the target, using values from the source
     __visit_all_variables(
-        target, lambda variable, curr_path: __parse_variables_unscoped(variable, source))
+        target, lambda variable, curr_path: replace_unscoped_variables(variable, source))
 
     # We then replace all variables in the target, using values from the target
     __visit_all_variables(
-        target, lambda variable, curr_path: parse_variables(variable, target, curr_path))
+        target, lambda variable, curr_path: replace_scoped_variables(
+            variable, target, curr_path, nodes_to_skip))
 
-    def check_no_variable_left(text: str, _) -> str:
-        if contains_variable(text):
-            raise ValueError(f'Failed to replace variables in: {text}')
-        return text
-
-    __visit_all_variables(target, check_no_variable_left)
+    __visit_all_variables(
+        target, lambda variable, curr_path: check_replaced(variable))
 
     return target
 
@@ -84,25 +95,21 @@ def __visit_all_variables(target: dict[str, any],
     iter_dict(target, None, [] if path is None else path)
 
 
-def parse_variables(text: str, context: dict[str, any], curr_path: [str] = None) -> str:
+def replace_scoped_variables(text: str,
+                             context: dict[str, any],
+                             curr_path: [str] = None,
+                             nodes_to_skip: Union[list[str], None] = None) -> str:
     def replace(name: str) -> Union[str, None]:
         replacement = context.get(name)
         if replacement is None:
-            replacement = __get_scoped_value_for_name_having_prefix(
-                curr_path, name, SELF_KEY, context)
+            replacement = get_scoped_value_for_name_having_prefix(
+                curr_path, name, SELF_KEY, lambda k: context.get(k, None), nodes_to_skip)
         return replacement
 
-    return __parse_variables(text, replace)
+    return replace_variables(text, replace)
 
 
-def __parse_variables_unscoped(text: str, context: dict[str, any]) -> str:
-    def replace(name: str) -> Union[str, None]:
-        return context.get(name, None)
-
-    return __parse_variables(text, replace)
-
-
-def __parse_variables(target: str, replace: Callable[[str], any]) -> any:
+def replace_variables(target: str, replace: Callable[[str], any]) -> any:
     if not contains_variable(target):
         return target
     result = target
@@ -127,23 +134,26 @@ def __parse_variables(target: str, replace: Callable[[str], any]) -> any:
     return result
 
 
-def __get_scoped_value_for_name_having_prefix(
+def get_scoped_value_for_name_having_prefix(
         curr_path: [str],
         name: str,
         prefix: str,
-        context: dict[str, any] = None) -> Union[any, None]:
+        get: Callable[[str], any] = None,
+        nodes_to_skip: Union[list[str], None] = None) -> Union[any, None]:
     def get_value(values_scope: any, key: str) -> any:
         if values_scope is None:
-            return None if context is None else context.get(key, None)
+            return None if get is None else get(key)
         else:
             return values_scope.get(key, None)
 
-    return __get_scoped_value(curr_path, name, prefix, get_value)
+    return get_scoped_value(curr_path, name, prefix, get_value, nodes_to_skip)
 
-def __get_scoped_value(curr_path: [str],
-                       name: str,
-                       prefix: str,
-                       get_value: Callable[[any, str], any]) -> Union[str, None]:
+
+def get_scoped_value(curr_path: [str],
+                     name: str,
+                     prefix: str,
+                     get_value: Callable[[any, str], any],
+                     nodes_to_skip: Union[list[str], None] = None) -> Union[str, None]:
     if not name.startswith(prefix):
         return None
     parts_including_prefix, index = __parse_index_part(name)
@@ -151,11 +161,20 @@ def __get_scoped_value(curr_path: [str],
 
     parts = __expand_me(curr_path, parts)
 
+    extras = [] if nodes_to_skip is None else [e for e in nodes_to_skip]
+
     scope = None
     for k in parts:
         try:
 
             v = get_value(scope, k)
+
+            if v is None and len(extras) > 0:
+                extra = extras[0]
+                v = get_value(scope, extra)
+                if v is not None:
+                    extras.pop(0)
+                    v = get_value(v, k)
 
         except Exception as ex:
             raise ValueError(f'Value not found for: {k} of {name} in {scope}') from ex
