@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] - 2024-06-22
+
 ### Changed
 
-- YamlLoader to fail fast or return default if specified.
+- `YamlLoader` to return default if specified or fail fast.
 
 ## [0.1.5] - 2024-06-09
 
