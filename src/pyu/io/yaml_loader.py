@@ -40,12 +40,15 @@ class YamlLoader:
     def load_config(self, path: [str]) -> dict[str, any]:
         return self.load_from_path(self.get_path(path))
 
-    def load_from_path(self, path: str) -> dict[str, any]:
+    def load_from_path(self, path: str, default: Union[dict[str, any], None] = None) \
+            -> dict[str, any]:
         try:
             return self.__transform(load_yaml(path))
-        except FileNotFoundError:
-            logger.warning(f'Could not find config file for: {path}')
-            return {}
+        except Exception as ex:
+            if default is None:
+                raise ex
+            logger.warning(f'Failed to read: {path}')
+            return default
 
     def get_app_config_path(self) -> str:
         return self.get_path('app')
