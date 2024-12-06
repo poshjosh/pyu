@@ -4,11 +4,11 @@ from setuptools import setup, find_packages
 
 if __name__ == "__main__":
     setup(name="pyu",
-          version="0.1.7",
+          version="0.1.8",
           description="Python utilities for common tasks",
           author="PyU Team",
           author_email="posh.bc@gmail.com",
-          install_requires=["PyYAML==6.0.1"],
+          install_requires=["PyYAML==6.0.2"],
           classifiers=[
               "Programming Language :: Python :: 3",
               "License :: OSI Approved :: MIT License",
