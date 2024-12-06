@@ -60,6 +60,20 @@ self-variable: $self.str
         self.assertEqual(config['env-variable'], os.environ[env_variable])
         self.assertEqual(config['self-variable'], str_value)
 
+    def test_replace_all_variables_with_different_cases(self):
+        str_value: str = 'Test'
+        env_variable = "TEST_ENV_VARIABLE"
+        yaml_str: str = f"""
+str: {str_value}
+env-variable: ${env_variable.lower().replace('_', '-')}
+self-variable: $self.str
+        """
+        os.environ[env_variable] = "Test_env_value"
+        config: dict = load_yaml_str(yaml_str)
+        config = replace_all_variables(config, dict(os.environ))
+        self.assertEqual(config['env-variable'], os.environ[env_variable])
+        self.assertEqual(config['self-variable'], str_value)
+
 
 if __name__ == '__main__':
     unittest.main()

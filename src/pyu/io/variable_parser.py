@@ -4,7 +4,7 @@ from typing import Union, Tuple, Callable
 
 """
 {
-  will-be-replaced-from-environment: ${APP_NAME} 
+  will-be-replaced-from-environment: ${APP_NAME}  # We ignore case _ and - in the variable name
   # `self` is a special variable that refers to this hierarchy.
   reference-to-author-greeting: $self.author.greeting
   author:
@@ -40,6 +40,10 @@ def _check_replaced(text: str) -> str:
     return text
 
 
+def _format_key(key: str) -> str:
+    return key if not key else key.replace('-', '').replace('_', '').lower()
+
+
 def replace_all_variables(target: dict[str, any],
                           source: dict[str, any],
                           check_replaced: Callable[[str], str] = _check_replaced,
@@ -47,8 +51,12 @@ def replace_all_variables(target: dict[str, any],
     target = copy.deepcopy(target)
 
     def replace_unscoped_variables(text: str, context: dict[str, any]) -> str:
+        variable_source = {}
+        for k, v in context.items():
+            variable_source[_format_key(k)] = v
+
         def replace(name: str) -> Union[str, None]:
-            return context.get(name, None)
+            return variable_source.get(_format_key(name), None)
 
         return replace_variables(text, replace)
 
