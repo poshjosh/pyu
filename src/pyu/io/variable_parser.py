@@ -61,23 +61,39 @@ def replace_all_variables(target: dict[str, any],
         return replace_variables(text, replace)
 
     # We first replace all variables in the target, using values from the source
-    __visit_all_variables(
-        target, lambda variable, curr_path: replace_unscoped_variables(variable, source))
+    visit_string_values(
+        target, lambda sval, curr_path: replace_unscoped_variables(sval, source))
 
     # We then replace all variables in the target, using values from the target
-    __visit_all_variables(
-        target, lambda variable, curr_path: replace_scoped_variables(
-            variable, target, curr_path, nodes_to_skip))
+    visit_string_values(
+        target, lambda sval, curr_path: replace_scoped_variables(
+            sval, target, curr_path, nodes_to_skip))
 
-    __visit_all_variables(
-        target, lambda variable, curr_path: check_replaced(variable))
+    visit_string_values(
+        target, lambda sval, curr_path: check_replaced(sval))
 
     return target
 
 
-def __visit_all_variables(target: dict[str, any],
-                          visit: Callable[[str, [str]], str],
-                          path: [str] = None):
+def visit_variables(target: str, visit: Callable[[str, int, int], int]):
+    if not contains_variable(target):
+        return target
+    pos = 0
+    while pos < len(target):
+        t: [str, int, int] = __extract_first_variable(target, pos, None)
+        if t is None:
+            break
+        name = t[0]
+        start = t[1]
+        end = t[2]
+        pos = visit(name, start, end)
+        if not pos:
+            pos = end
+
+
+def visit_string_values(target: dict[str, any],
+                        visit: Callable[[str, [str]], str],
+                        path: [str] = None):
     # TODO - Implement 'me' expansion for $self related variables, test it too
     #  To achieve the above you need to implement the correct curr_path argument
     def iter_dict(d: dict[str, any], _, curr_path: [str]):

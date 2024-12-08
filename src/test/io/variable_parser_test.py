@@ -2,10 +2,37 @@ import os
 import unittest
 
 from pyu.io.file import load_yaml_str
-from pyu.io.variable_parser import replace_scoped_variables, replace_all_variables
+from pyu.io.variable_parser import replace_scoped_variables, replace_all_variables, \
+    visit_string_values, visit_variables
 
 
 class VariableParserTest(unittest.TestCase):
+    def test_visit_all_variables(self):
+        config: dict = {
+            "string": "string",
+            "variable:": "$v_0",
+            "string-with-variable": "string${v_1}string",
+            "list-with-variable": ["", "$v_2", "string${v_3}string"],
+            "dict-with-variable": {
+                "bool": True,
+                "string-with-variable": "string${v_4}string",
+            }
+        }
+
+        variables = []
+
+        def collect_variable(variable, _, end):
+            variables.append(variable)
+            return end
+
+        def collect_string_value(sval, path):
+            visit_variables(sval, collect_variable)
+            return sval
+
+        visit_string_values(config, collect_string_value)
+
+        self.assertEqual(["v_0", "v_1", "v_2", "v_3", "v_4"], variables)
+
     def test_replace_scoped_variables_given_single_variable(self):
         text = '$k'
         result = replace_scoped_variables(text, {'k': 'v'})

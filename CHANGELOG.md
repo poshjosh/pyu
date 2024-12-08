@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.9] - 2024-12-08
+
+### Changed
+
+- Expose function `visit_string_values` of module `variable_parser`.
+- Added function `visit_variables` to module `variable_parser`.
+
 ## [0.1.8] - 2024-12-06
 
 ### Changed
